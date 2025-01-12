@@ -1,5 +1,5 @@
-import HomeHeader from "@/components/pages/home/header/HomeHeader";
-import MapHome from "@/components/pages/home/Map/MapHome";
+import HomeHeader from "../home/header/HomeHeader";
+import MapHome from "../home/Map/MapHome"
 
 export default function Home() {
     return (
