@@ -5,17 +5,52 @@ import Button from "@/components/ui/Button";
 import Tipografy from "@/components/Tipografy";
 import { Icar, Imoto, Istar } from "@icons";
 
+const ALL_SERVICES = [
+  { id: "ayuda", label: "Ayuda en carretera" },
+  { id: "domicilio", label: "A domicilio" },
+  { id: "revision", label: "Revisión" },
+  { id: "cambioAceite", label: "Cambio de aceite" },
+  { id: "lavado", label: "Lavado" },
+  { id: "diagnostico", label: "Diagnóstico" },
+  { id: "neumaticos", label: "Cambio de neumáticos" },
+  { id: "bateria", label: "Revisión de batería" },
+];
+
 export default function Filter() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 120]);
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [showOtherInput, setShowOtherInput] = useState<boolean>(false);
-
   const [selectedCar, setSelectedCar] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [visibleServices, setVisibleServices] = useState<number>(5);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const handleToggleServices = () => {
+    setVisibleServices(isExpanded ? 5 : ALL_SERVICES.length);
+    setIsExpanded(!isExpanded);
+  };
 
   const handleRangeChange = (values: [number, number]) => {
-    setPriceRange(values);
+    // Asegúrate de que los puntos no se superpongan
+    if (values[0] < values[1]) {
+      // Establece una distancia mínima entre los puntos (por ejemplo, 10)
+      const minDistance = 3;
+
+      // Si la diferencia entre los puntos es menor que la distancia mínima
+      if (values[1] - values[0] < minDistance) {
+        // Ajusta el punto máximo para mantener la distancia mínima
+        values[1] = values[0] + minDistance;
+
+        // Asegúrate de no exceder el máximo permitido
+        if (values[1] > 120) {
+          values[1] = 120;
+          values[0] = 110; // Ajusta el punto mínimo si es necesario
+        }
+      }
+
+      setPriceRange(values);
+    }
   };
 
   const handleMouseEnter = (index: number) => {
@@ -33,65 +68,62 @@ export default function Filter() {
   const handleCarSelection = (type: string) => {
     if (type === "otros") {
       setShowOtherInput(true);
-      setPriceRange([0, 200]); // Establecer el rango máximo a 200
+      setPriceRange([0, 200]);
     } else if (type === "imoto") {
       setShowOtherInput(false);
-      setPriceRange([0, 180]); // Establecer el rango máximo a 180
+      setPriceRange([0, 180]);
     } else {
       setShowOtherInput(false);
-      setPriceRange([0, 120]); // Establecer el rango máximo a 120
+      setPriceRange([0, 120]);
     }
-
-    // Alternar selección de automóvil
     setSelectedCar((prev) => (prev === type ? null : type));
   };
 
   const handleServiceSelection = (type: string) => {
-    // Alternar selección de servicio
     setSelectedServices((prev) => {
       if (prev.includes(type)) {
-        return prev.filter((service) => service !== type); // Eliminar si ya está seleccionado
+        return prev.filter((service) => service !== type);
       } else {
-        return [...prev, type]; // Agregar si no está seleccionado
+        return [...prev, type];
       }
     });
   };
+
   return (
     <form>
       <Tipografy as="h5" className="mt-3">
         Selecione su tipo transporte{" "}
       </Tipografy>
       <div className="flex flex-col gap-4 p-4">
-        <div className="flex justify-around border border-slate-600 rounded-lg items-center p-1">
+        <div className="flex flex-wrap justify-around border border-slate-600 rounded-lg items-center p-2">
           <Button
             type="button"
             variant="normal"
-            className={`px-12 py-2 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
               selectedCar === "icar" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("icar")}
           >
-            <Icar />
+            <div className="justify-self-center">
+              <Icar />
+            </div>
           </Button>
-          <hr className="w-11/12 h-px bg-slate-600" />
-
           <Button
             type="button"
             variant="normal"
-            className={`px-12 py-2 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
               selectedCar === "imoto" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("imoto")}
           >
-            <Imoto />
+            <div className="justify-self-center">
+              <Imoto />
+            </div>
           </Button>
-          <div className="flex justify-center">
-            <div className="w-px h-7 bg-slate-600"></div>
-          </div>
           <Button
             type="button"
             variant="normal"
-            className={`px-12 py-2 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
               selectedCar === "otros" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("otros")}
@@ -105,7 +137,7 @@ export default function Filter() {
         <Input
           type="text"
           placeholder="Especifica otro tipo de transporte..."
-          className="mb-4 bg-white w-96 ml-4"
+          className="mb-4 bg-white w-full"
         />
       )}
 
@@ -123,6 +155,7 @@ export default function Filter() {
             min={30}
             max={120}
             step={1}
+            minDistance={3}
             ariaLabel={["Min price", "Max price"]}
           />
           <div className="flex justify-between w-full mt-2">
@@ -161,60 +194,39 @@ export default function Filter() {
         <Tipografy as="h5" className="mb-4">
           Servicios
         </Tipografy>
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="normal"
-            className={`flex hover:bg-gray-100 rounded-full border border-gray px-4 py-2 gap-2 ${
-              selectedServices.includes("ayuda") ? "border border-black" : ""
-            }`}
-            onClick={() => handleServiceSelection("ayuda")}
-          >
-            <Tipografy as="p"> Ayuda en carretera </Tipografy>
-          </Button>
-
-          <Button
-            type="button"
-            variant="normal"
-            className={`flex hover:bg-gray-100 rounded-full border border-gray px-4 py-2 gap-2 ${
-              selectedServices.includes("domicilio")
-                ? "border border-black"
-                : ""
-            }`}
-            onClick={() => handleServiceSelection("domicilio")}
-          >
-            <Tipografy as="p"> A domicilio </Tipografy>
-          </Button>
+        <div className="flex flex-wrap gap-3">
+          {ALL_SERVICES.slice(0, visibleServices).map((service) => (
+            <Button
+              key={service.id}
+              type="button"
+              variant="normal"
+              className={`flex hover:bg-gray-100 rounded-full border border-gray px-4 py-2 gap-2 ${
+                selectedServices.includes(service.id)
+                  ? "border border-black"
+                  : ""
+              }`}
+              onClick={() => handleServiceSelection(service.id)}
+            >
+              <Tipografy as="p">{service.label}</Tipografy>
+            </Button>
+          ))}
         </div>
 
-        <div className="flex gap-3 py-3">
-          <Button
-            type="button"
-            variant="normal"
-            className={`flex hover:bg-gray-100 rounded-full border border-gray px-4 py-2 gap-2 ${
-              selectedServices.includes("revision") ? "border border-black" : ""
-            }`}
-            onClick={() => handleServiceSelection("revision")}
-          >
-            <Tipografy as="p"> Revisión </Tipografy>
-          </Button>
-
-          <Button
-            type="button"
-            variant="normal"
-            className={`flex hover:bg-gray-100 rounded-full border border-gray px-4 py-2 gap-2 ${
-              selectedServices.includes("cambioAceite")
-                ? "border border-black"
-                : ""
-            }`}
-            onClick={() => handleServiceSelection("cambioAceite")}
-          >
-            <Tipografy as="p"> Cambio de aceite </Tipografy>
-          </Button>
-        </div>
+        {ALL_SERVICES.length > 5 && (
+          <div className="mt-4 text-center">
+            <Button
+              type="button"
+              variant="normal"
+              className="px-4 py-2 border-2 border-neutral-600 rounded-full"
+              onClick={handleToggleServices}
+            >
+              {isExpanded ? "Mostrar menos ↑↑" : "Mostrar más ↓↓"}
+            </Button>
+          </div>
+        )}
       </div>
 
-      <hr className="w-11/12 h-px bg-slate-600" />
+      <hr className="w-11/12 h-px bg-slate-600 m-4"/>
 
       <div className="mt-4 mb-4">
         <Tipografy as="h5">Filtrar por puntuación</Tipografy>

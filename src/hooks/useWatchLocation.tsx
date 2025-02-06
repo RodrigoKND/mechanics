@@ -15,7 +15,7 @@ export function useWatchLocation() {
 
   const configGeolocation = {
     enableHighAccuracy: true,
-    timeout: 5000,
+    timeout: 100000,
     maximumAge: 0,
   };
 
@@ -24,6 +24,7 @@ export function useWatchLocation() {
   const handlePositionUpdate = useCallback(
     (position: GeolocationPosition) => {
       const { latitude, longitude, speed } = position.coords;
+      console.log(latitude,longitude)
       const valueSpeed = !speed ? 0 : speed;
       const newLocation = { latitude, longitude, valueSpeed };
       if (

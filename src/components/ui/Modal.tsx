@@ -23,7 +23,7 @@ export default function Modal({
     >
       <dialog
         open={isVisible}
-        className={`absolute inset-0 z-50 rounded-xl ${classNameModal} overflow-y-auto bg-white p-6 max-w-lg w-screen`}
+        className={`absolute inset-0 z-50 rounded-xl text-white ${classNameModal} overflow-y-auto bg-white p-6 max-w-lg w-screen`}
       >
         <div className="flex justify-end mb-3">
           <Button variant="normal" type="button" onClick={() => setIsVisible(false)}>

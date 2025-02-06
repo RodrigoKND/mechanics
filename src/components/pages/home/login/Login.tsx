@@ -14,7 +14,7 @@ export default function Login() {
       <Input
         type="password"
         placeholder="Contraseña"
-        className="w-full"
+        className="w-full "
         autoComplete="off"
         required
       />

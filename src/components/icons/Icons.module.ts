@@ -21,3 +21,5 @@ export { Imoto } from "@/components/icons/Imoto";
 export { Istar } from "@/components/icons/Istar";
 export { Iphone } from "@/components/icons/Iphone";
 export { IarrowDown } from "@/components/icons/IarrowDown";
+export {Icheck} from "@/components/icons/Icheck";
+export {Iusers} from "@/components/icons/Iusers";

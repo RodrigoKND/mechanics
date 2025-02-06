@@ -89,5 +89,7 @@ export default function MapHome() {
         movingWorkShop={movingWorkShop}
       />
     </>
+    
   );
+  
 }
