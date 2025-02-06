@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Map, Marker, Overlay, ZoomControl } from "pigeon-maps";
+import { useEffect, useState } from "react";
+import { Map, Overlay, ZoomControl } from "pigeon-maps";
 import Section from "@/components/Section";
 import InfoPlace from "@/components/pages/home/InfoPlace/InfoPlace";
 import { useWatchLocation } from "@/hooks/useWatchLocation";
 import MessageAlert from "@/components/MessageAlert";
 import { useAuthGoogle } from "@/hooks/useAuthGoogle";
+import { io } from "socket.io-client";
 
 export default function MapHome() {
   const provider = (x: number, y: number, z: number) => {
@@ -22,6 +23,31 @@ export default function MapHome() {
 
   const { location, error } = useWatchLocation();
   const { infoUser } = useAuthGoogle();
+  const [coords, setCoords] = useState<Array<Record<string, number>>>([]);
+
+  const socket = io("http://localhost:3000");
+  const sendCoordsSocket = () => {
+    socket.emit("send-location", location);
+  };
+
+  const getCoordsSocket = () => {
+    socket.on("received-coords", (data) =>{
+      const setCoordsUnique = new Set(coords);
+      if (setCoordsUnique.has(data)) {
+        return;
+      }
+      setCoordsUnique.add(data);
+      setCoords((prev) => [...prev, data])
+    }
+    );
+  };
+
+  useEffect(() => {
+    sendCoordsSocket();
+    getCoordsSocket();
+    console.log(coords);
+  }, [location]);
+
   return (
     <>
       {error && <MessageAlert message={error} state="error" />}
@@ -35,45 +61,25 @@ export default function MapHome() {
           defaultZoom={11}
         >
           <ZoomControl style={{ top: window.innerHeight - 100 }} />
-          <Overlay anchor={[location.latitude, location.longitude]}>
-            <div className="relative cursor-pointer" onClick={handleWorkShop}>
-              <img
-                src={
-                  infoUser
-                    ? infoUser?.user_metadata?.avatar_url + "-mo"
-                    : "https://static.vecteezy.com/system/resources/thumbnails/019/897/155/small/location-pin-icon-map-pin-place-marker-png.png"
-                }
-                className="w-10 border-2 border-blue-300 h-10 rounded-full object-cover"
-                alt={
-                  infoUser
-                    ? infoUser?.identities?.[0]?.identity_data?.full_name
-                    : "User session image"
-                }
-              />
-            </div>
-          </Overlay>
-          {/* <Marker
-            color={!isChangeColorMarker ? "#93C0D0" : "#EA443C"}
-            width={50}
-            anchor={[location.latitude, location.longitude]}
-            onClick={handleWorkShop}
-          >
-            <div className="relative cursor-pointer pointer-events-none">
-              <img
-                src={
-                  infoUser
-                    ? infoUser?.user_metadata?.avatar_url + "-mo"
-                    : "https://static.vecteezy.com/system/resources/thumbnails/019/897/155/small/location-pin-icon-map-pin-place-marker-png.png"
-                }
-                className="w-12 h-10 rounded-full object-cover pointer-events-none"
-                alt={
-                  infoUser
-                    ? infoUser?.identities?.[0]?.identity_data?.full_name
-                    : "User session image"
-                }
-              />
-            </div>
-          </Marker> */}
+          {coords.map((coord, index) => (
+            <Overlay key={index} anchor={[coord.latitude, coord.longitude]}>
+              <div className="relative cursor-pointer" onClick={handleWorkShop}>
+                <img
+                  src={
+                    infoUser
+                      ? infoUser?.user_metadata?.avatar_url + "-mo"
+                      : "https://static.vecteezy.com/system/resources/thumbnails/019/897/155/small/location-pin-icon-map-pin-place-marker-png.png"
+                  }
+                  className="w-10 border-2 border-blue-300 h-10 rounded-full object-cover"
+                  alt={
+                    infoUser
+                      ? infoUser?.identities?.[0]?.identity_data?.full_name
+                      : "User session image"
+                  }
+                />
+              </div>
+            </Overlay>
+          ))}
         </Map>
       </Section>
 

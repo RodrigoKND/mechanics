@@ -1,4 +1,4 @@
-export function IarrowDown({isOpen = false}: {isOpen: boolean}) {
+export function IarrowDown({ isOpen = false }: { isOpen: boolean }) {
   return (
     <svg
       className={`w-4 h-4 transition-transform ${
