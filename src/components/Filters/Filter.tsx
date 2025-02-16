@@ -1,20 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactSlider from "react-slider";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Tipografy from "@/components/Tipografy";
 import { Icar, Imoto, Istar } from "@icons";
-
-const ALL_SERVICES = [
-  { id: "ayuda", label: "Ayuda en carretera" },
-  { id: "domicilio", label: "A domicilio" },
-  { id: "revision", label: "Revisión" },
-  { id: "cambioAceite", label: "Cambio de aceite" },
-  { id: "lavado", label: "Lavado" },
-  { id: "diagnostico", label: "Diagnóstico" },
-  { id: "neumaticos", label: "Cambio de neumáticos" },
-  { id: "bateria", label: "Revisión de batería" },
-];
+import { supabase } from "@/components/pages/home/login/RegisterGoogle"; // Asegúrate de que la ruta sea correcta
 
 export default function Filter() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 120]);
@@ -23,26 +13,69 @@ export default function Filter() {
   const [showOtherInput, setShowOtherInput] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [saveOthersInput, setSaveOthersInput] = useState<string | null>(null);
   const [visibleServices, setVisibleServices] = useState<number>(5);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [services, setServices] = useState<{ id: string; label: string }[]>([]); // Estado para los servicios
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const { data, error } = await supabase
+        .from("services") // Cambia "services" por el nombre de la tabla
+        .select("id, label"); // Asegúrate de que estos sean los nombres de las columnas
+
+      if (error) {
+        console.error("Error fetching services:", error);
+      } else {
+        setServices(data || []);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  // Cargar filtros desde localStorage
+  useEffect(() => {
+    const savedFilters = localStorage.getItem("userFilters");
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      setPriceRange(filters.priceRange || [0, 120]);
+      setRating(filters.rating || 0);
+      setSelectedCar(filters.selectedCar || null);
+      console.log(filters);
+      setSelectedServices(filters.selectedServices || []);
+      setSaveOthersInput(filters.saveOthersInput || null);
+      setShowOtherInput(filters.saveOthersInput !== null);
+    }
+  }, []);
+
+  const saveOthers = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSaveOthersInput(e.target.value)
+  };
+
+  const saveFilter = () => {
+    const filters = {
+      priceRange,
+      rating,
+      selectedCar,
+      selectedServices,
+      saveOthersInput,
+    };
+    localStorage.setItem("userFilters", JSON.stringify(filters));
+  };
 
   const handleToggleServices = () => {
-    setVisibleServices(isExpanded ? 5 : ALL_SERVICES.length);
+    setVisibleServices(isExpanded ? 5 : services.length);
     setIsExpanded(!isExpanded);
   };
 
   const handleRangeChange = (values: [number, number]) => {
-    // Asegúrate de que los puntos no se superpongan
     if (values[0] < values[1]) {
-      // Establece una distancia mínima entre los puntos (por ejemplo, 10)
-      const minDistance = 3;
+      const minDistance = 8;
 
-      // Si la diferencia entre los puntos es menor que la distancia mínima
       if (values[1] - values[0] < minDistance) {
-        // Ajusta el punto máximo para mantener la distancia mínima
         values[1] = values[0] + minDistance;
 
-        // Asegúrate de no exceder el máximo permitido
         if (values[1] > 120) {
           values[1] = 120;
           values[0] = 110; // Ajusta el punto mínimo si es necesario
@@ -94,12 +127,12 @@ export default function Filter() {
       <Tipografy as="h5" className="mt-3">
         Selecione su tipo transporte{" "}
       </Tipografy>
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex flex-wrap justify-around border border-slate-600 rounded-lg items-center p-2">
+      <div className="flex-col p-3">
+        <div className="flex flex-wrap border border-slate-600 rounded-lg items-center p-1">
           <Button
             type="button"
             variant="normal"
-            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 p-2 ${
               selectedCar === "icar" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("icar")}
@@ -111,7 +144,7 @@ export default function Filter() {
           <Button
             type="button"
             variant="normal"
-            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 p-2 ${
               selectedCar === "imoto" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("imoto")}
@@ -123,7 +156,7 @@ export default function Filter() {
           <Button
             type="button"
             variant="normal"
-            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 ${
+            className={`flex-1 m-1 rounded-lg bg-white hover:bg-gray-100 p-2 ${
               selectedCar === "otros" ? "border border-black" : ""
             }`}
             onClick={() => handleCarSelection("otros")}
@@ -137,7 +170,9 @@ export default function Filter() {
         <Input
           type="text"
           placeholder="Especifica otro tipo de transporte..."
-          className="mb-4 bg-white w-full"
+          className="mb-4 bg-white w-full placeholder:text-sm lg:placeholder:text-lg"
+          onChange={saveOthers}
+          value={saveOthersInput}
         />
       )}
 
@@ -195,7 +230,7 @@ export default function Filter() {
           Servicios
         </Tipografy>
         <div className="flex flex-wrap gap-3">
-          {ALL_SERVICES.slice(0, visibleServices).map((service) => (
+          {services.slice(0, visibleServices).map((service) => (
             <Button
               key={service.id}
               type="button"
@@ -212,7 +247,7 @@ export default function Filter() {
           ))}
         </div>
 
-        {ALL_SERVICES.length > 5 && (
+        {services.length > 5 && (
           <div className="mt-4 text-center">
             <Button
               type="button"
@@ -226,7 +261,7 @@ export default function Filter() {
         )}
       </div>
 
-      <hr className="w-11/12 h-px bg-slate-600 m-4"/>
+      <hr className="w-11/12 h-px bg-slate-600 m-4" />
 
       <div className="mt-4 mb-4">
         <Tipografy as="h5">Filtrar por puntuación</Tipografy>
@@ -249,7 +284,9 @@ export default function Filter() {
         </div>
       </div>
 
-      <Button type="submit">Aplicar</Button>
+      <Button type="submit" onClick={saveFilter}>
+        Aplicar
+      </Button>
     </form>
   );
 }

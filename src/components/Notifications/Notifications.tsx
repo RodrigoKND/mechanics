@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icampaignplus } from "@icons";
 import { ListItem } from "@/components/List";
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://your-supabase-url.supabase.co';
+const supabaseAnonKey = 'your-anon-key';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Notification {
   id: number;
@@ -10,28 +15,28 @@ interface Notification {
 
 export default function Notifications() {
   const [showNotifications, setShowNotifications] = useState(false);
-
-  const notifications: Notification[] = [
-    {
-      id: 1,
-      message: "Nuevo mensaje de Taller Mecánico Express",
-      timestamp: "Hace 5 minutos",
-    },
-    {
-      id: 2,
-      message: "Nuevo mensaje de Taller Mecánico Express",
-      timestamp: "Hace 5 minutos",
-    },
-    {
-      id: 3,
-      message: "Nuevo mensaje de Taller Mecánico Express",
-      timestamp: "Hace 5 minutos",
-    },
-  ];
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const handleNotificationsToggle = () => {
     setShowNotifications(!showNotifications);
   };
+
+  // Función para obtener notificaciones desde Supabase
+  const fetchNotifications = async () => {
+    const { data, error } = await supabase
+      .from('notifications') // Cambia 'notifications' por el nombre de tu tabla
+      .select('*');
+
+    if (error) {
+      console.error("Error fetching notifications:", error);
+    } else {
+      setNotifications(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   return (
     <ListItem
@@ -59,7 +64,7 @@ export default function Notifications() {
                 >
                   <p className="text-sm">{notification.message}</p>
                   <small className="text-gray-500">
-                    {notification.timestamp}
+                    {new Date(notification.timestamp).toLocaleString()}
                   </small>
                 </div>
               ))

@@ -7,6 +7,7 @@ import Image from "@/components/ui/Image";
 import { List, ListItem } from "@/components/List";
 import Section from "@/components/Section";
 
+
 import {
   Iclosex,
   IarrowLeft,
@@ -29,22 +30,10 @@ interface InfoPlaceProps {
 }
 
 const services = [
-  {
-    id: 1,
-    name: "Servicio de mantenimiento",
-  },
-  {
-    id: 2,
-    name: "Servicio de reparacion",
-  },
-  {
-    id: 3,
-    name: "Servicio de limpieza",
-  },
-  {
-    id: 4,
-    name: "Servicio de limpieza",
-  },
+  { id: 1, name: "Servicio de mantenimiento" },
+  { id: 2, name: "Servicio de reparación" },
+  { id: 3, name: "Servicio de limpieza" },
+  { id: 4, name: "Servicio de diagnóstico" },
 ];
 
 export default function InfoPlace({
@@ -73,14 +62,11 @@ export default function InfoPlace({
 
   const { isLogged } = useAuthUser();
 
-  const sendData = async (e:FormEvent) => {
+  const sendData = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isLogged) 
-      return;
+    if (!isLogged) return;
 
     alert("TODO: Sending data to the backend");
-
-    // TODO: Sending data to the backend
   };
 
   return (
@@ -92,7 +78,7 @@ export default function InfoPlace({
         />
       )}
       <Aside
-        className={`${movingWorkShop} absolute max-w-md z-40 transition-tranform ease-in-out right-0 duration-300 top-0 ${
+        className={`${movingWorkShop} absolute max-w-md z-40 transition-transform ease-in-out right-0 duration-300 top-0 ${
           isVisible ? "xl:w-2/6" : "hidden"
         }`}
       >
@@ -126,14 +112,13 @@ export default function InfoPlace({
           <List className="flex-col gap-2 my-7">
             <ListItem type="option" className="text-sm font-light">
               <ImarkerLocation />
-              <span>Avenida Central Cordoba</span>
+              <span>Avenida Central Córdoba</span>
             </ListItem>
             <ListItem type="option" className="text-sm font-light">
               <Iwatch />
               <span>Disponible ahora</span>
             </ListItem>
           </List>
-
           <Section className="flex w-full mt-5 mb-8 items-center gap-3">
             <div>
               <Ikey />
@@ -148,7 +133,6 @@ export default function InfoPlace({
               })}
             </List>
           </Section>
-
           <Button variant="primary" type="primary">
             Solicitar mecánico
           </Button>

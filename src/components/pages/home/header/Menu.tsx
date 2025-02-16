@@ -1,10 +1,13 @@
+import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
 import Tipografy from "@/components/Tipografy";
 import AvatarWithText from "@/components/AvatarWithText";
 import { List, ListItem } from "@/components/List";
-import { Igearplus, Iclosex, Imessage } from "@icons";
+import { Igearplus, Icampaignplus, Iclosex, Imessage } from "@icons";
+import { Istatistics } from "@icons";
+import Statistics from "@/components/pages/home/statistics/Statistics"; 
 import Notification from "../../../Notifications/Notifications";
 
 interface Notification {
@@ -13,9 +16,21 @@ interface Notification {
   timestamp: string;
 }
 
+interface MenuProps {
+  visibilityMenu: string;
+  handleMenu: () => void;
+}
+        
 export default function Menu({ visibilityMenu, handleMenu }: MenuProps) {
+  const [movingWorkShop, setMovingWorkShop] = useState<string>("translate-x-full");
 
+  const handleWorkShop = () => {
+    setMovingWorkShop((prev) =>
+      prev === "translate-x-0" ? "translate-x-full" : "translate-x-0"
+    );
+  };
   return (
+    <>
     <Aside
       className={`${visibilityMenu} absolute z-30 h-full inset-0 transition-transform lg:w-1/4`}
     >
@@ -27,18 +42,20 @@ export default function Menu({ visibilityMenu, handleMenu }: MenuProps) {
           </Button>
         </Header>
         <List className="flex-col mb-7">
-          <ListItem type="menu">
-            <Igearplus />
-            <span>Mecánicos solicitados</span>
-          </ListItem>
-
-          <Notification/>
-
-          <ListItem type="menu">
-            <Imessage />
-            <span>Mensajes</span>
-          </ListItem>
-        </List>
+            <ListItem type="menu">
+              <Igearplus />
+              <span>Mecánicos solicitados</span>
+            </ListItem>
+            <Notification/>
+            <ListItem type="menu">
+              <Imessage />
+              <span>Mensajes</span>
+            </ListItem>
+            <ListItem type="menu" onClick={handleWorkShop}>
+              <Istatistics />
+              <span>Estadísticas</span>
+            </ListItem>
+          </List>
 
         <div className="flex flex-col gap-5">
           <Tipografy as="h5" className="text-lg font-semibold">
@@ -59,5 +76,11 @@ export default function Menu({ visibilityMenu, handleMenu }: MenuProps) {
         </div>
       </div>
     </Aside>
+       <Statistics
+        isVisible={movingWorkShop === "translate-x-0"}
+        handleWorkShop={handleWorkShop}
+        movingWorkShop={movingWorkShop}
+      />
+      </>
   );
 }

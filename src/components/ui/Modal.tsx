@@ -18,24 +18,26 @@ export default function Modal({
 }: ModalProps) {
   return (
     <div
-      className={`fixed overflow-y-none inset-0 z-50 bg-gray-900 bg-opacity-80 transition-opacity duration-300
-    ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      className={`fixed inset-0 z-50 transition-opacity duration-300 bg-gray-900 bg-opacity-80
+        ${isVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
-      <dialog
-        open={isVisible}
-        className={`absolute inset-0 z-50 rounded-xl text-white ${classNameModal} overflow-y-auto bg-white p-6 max-w-lg w-screen`}
-      >
-        <div className="flex justify-end mb-3">
-          <Button variant="normal" type="button" onClick={() => setIsVisible(false)}>
-            <Iclosex />
-          </Button>
-        </div>
+      {isVisible && (
+        <dialog
+          open={isVisible}
+          className={`absolute inset-0 z-50 rounded-xl text-black ${classNameModal} overflow-y-auto bg-white lg:p-6 p-3 max-w-lg w-auto`}
+        >
+          <div className="flex justify-end mb-3">
+            <Button variant="normal" type="button" onClick={() => setIsVisible(false)}>
+              <Iclosex />
+            </Button>
+          </div>
 
-        <div>
-          <h4 className="text-xl font-semibold">{title}</h4>
-        </div>
-        {children}
-      </dialog>
+          <div>
+            <h4 className="text-xl font-semibold">{title}</h4>
+          </div>
+          {children}
+        </dialog>
+      )}
     </div>
   );
 }

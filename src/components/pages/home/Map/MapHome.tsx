@@ -41,9 +41,9 @@ export default function MapHome() {
                 src={
                   infoUser
                     ? infoUser?.user_metadata?.avatar_url + "-mo"
-                    : "https://static.vecteezy.com/system/resources/thumbnails/019/897/155/small/location-pin-icon-map-pin-place-marker-png.png"
+                    : "/mechanicpin.webp"
                 }
-                className="w-10 border-2 border-blue-300 h-10 rounded-full object-cover"
+                className="w-16 h-16 border-2 rounded-full object-cover"
                 alt={
                   infoUser
                     ? infoUser?.identities?.[0]?.identity_data?.full_name
@@ -83,5 +83,7 @@ export default function MapHome() {
         movingWorkShop={movingWorkShop}
       />
     </>
+    
   );
+  
 }

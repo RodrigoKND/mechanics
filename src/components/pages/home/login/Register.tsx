@@ -27,7 +27,7 @@ export default function Register() {
   } = useSelectCountryAndPhone();
 
   return (
-    <form className="flex flex-col gap-3 w-full">
+    <form className="flex flex-col gap-3 w-full sm:w2/4">
       <Input
         type="text"
         placeholder="Nombre"

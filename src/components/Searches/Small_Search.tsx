@@ -3,13 +3,30 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Tipografy from "@/components/Tipografy";
 import { ImagnifyingGlass } from "@icons";
+import { supabase } from "@/components/pages/home/login/RegisterGoogle";
 
-export default function small_search() {
+interface Workshop {
+  name: string;
+}
+
+export default function SmallSearch() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState<Workshop[]>([]);
 
-  const handleSearch = () => {
-    console.log("Buscando:", searchQuery); // Lógica de búsqueda
-    document.body.click(); // Cierra la modal simulando un clic externo
+  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+
+    try {
+      const { data, error } = await supabase
+        .from("workshop")
+        .select("name")
+        .ilike("name", `%${searchQuery}%`); // Búsqueda sin distinción entre mayúsculas y minúsculas
+
+      if (error) throw error;
+      setResults(data as Workshop[]);
+    } catch (error) {
+      console.error("Error al buscar:", error);
+    }
   };
 
   return (
@@ -19,7 +36,7 @@ export default function small_search() {
           Buscar
         </Tipografy>
       </div>
-      <form className="flex items-center gap-2 w-full">
+      <form className="flex items-center gap-2 w-full" onSubmit={handleSearch}>
         <Input
           type="text"
           value={searchQuery}
@@ -29,15 +46,23 @@ export default function small_search() {
           placeholder="Buscar mecánicos..."
           className="w-full"
         />
-        <Button
-          variant="default"
-          onClick={handleSearch}
-          aria-label="Buscar"
-          type="submit"
-        >
+        <Button variant="default" aria-label="Buscar" type="submit">
           <ImagnifyingGlass />
         </Button>
       </form>
+
+      {/* Mostrar resultados */}
+      <div className="mt-4">
+        {results.length > 0 ? (
+          results.map((item, index) => (
+            <div key={index} className="p-2 border rounded-md shadow-sm">
+              {item.name}
+            </div>
+          ))
+        ) : (
+          searchQuery && <p>No se encontraron resultados.</p>
+        )}
+      </div>
     </div>
   );
 }
